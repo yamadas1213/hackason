@@ -1,0 +1,314 @@
+page 2 (
+    name: Customers
+    alias: CUSTOMERS
+    title: Customers
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+    help {
+        helpText: Search, filter, sort, and download customer records. Use the Actions menu to choose columns or save a personal report view.
+    }
+
+    region breadcrumb (
+        name: Customers
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region customers (
+        name: Customers
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select cust_id,
+                       first_name,
+                       last_name,
+                       email,
+                       city,
+                       state_province,
+                       country,
+                       age,
+                       gender,
+                       credit_balance,
+                       income,
+                       income_level,
+                       segment_id
+                  from customer
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: BODY
+        }
+        appearance {
+            template: @/interactive-report
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            showNullValuesAs: -
+        }
+        pagination {
+            type: rowRangesXToY
+        }
+        performance {
+            maxRowsToProcess: 1000000
+        }
+        messages {
+            whenNoDataFound: No customers found.
+            whenMoreDataFound: More than #MAX_ROW_COUNT# customers matched. Add a filter to narrow the results.
+        }
+        actionsMenu {
+            savePublicReport: false
+        }
+        download {
+            formats: [
+                csv
+                html
+            ]
+        }
+
+        column CUST_ID (
+            type: hidden
+            heading {
+                heading: Customer ID
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: NUMBER
+            }
+        )
+
+        column FIRST_NAME (
+            type: plainText
+            heading {
+                heading: First Name
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: Customer given name; Display Label is First Name; displayed in report; not displayed in form; no format mask; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column LAST_NAME (
+            type: plainText
+            heading {
+                heading: Last Name
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: Customer family name; Display Label is Last Name; displayed in report; not displayed in form; no format mask; value optional; read only; primary display column; no authorization scheme.
+            }
+        )
+
+        column EMAIL (
+            type: plainText
+            heading {
+                heading: Email
+            }
+            layout {
+                sequence: 40
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: Customer email address; Display Label is Email; displayed in report; not displayed in form; no format mask; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column CITY (
+            type: plainText
+            heading {
+                heading: City
+            }
+            layout {
+                sequence: 50
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: Customer city; Display Label is City; displayed in report; not displayed in form; no format mask; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column STATE_PROVINCE (
+            type: plainText
+            heading {
+                heading: State or Province
+            }
+            layout {
+                sequence: 60
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: Customer state or province; Display Label is State or Province; displayed in report; not displayed in form; no format mask; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column COUNTRY (
+            type: plainText
+            heading {
+                heading: Country
+            }
+            layout {
+                sequence: 70
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: Customer country; Display Label is Country; displayed in report; not displayed in form; no format mask; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column AGE (
+            type: plainText
+            heading {
+                heading: Age
+                alignment: end
+            }
+            layout {
+                sequence: 80
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            comments {
+                comments: Customer age; Display Label is Age; displayed in report; not displayed in form; no format mask; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column GENDER (
+            type: plainText
+            heading {
+                heading: Gender
+            }
+            layout {
+                sequence: 90
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: Customer gender category; Display Label is Gender; displayed in report; not displayed in form; no format mask; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column CREDIT_BALANCE (
+            type: plainText
+            heading {
+                heading: Credit Balance
+                alignment: end
+            }
+            layout {
+                sequence: 100
+                columnAlignment: end
+            }
+            appearance {
+                formatMask: FM999G999G999G990D00
+            }
+            source {
+                dataType: NUMBER
+            }
+            comments {
+                comments: Customer credit balance; Display Label is Credit Balance; displayed in report; not displayed in form; format mask FM999G999G999G990D00; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column INCOME (
+            type: plainText
+            heading {
+                heading: Income
+                alignment: end
+            }
+            layout {
+                sequence: 110
+                columnAlignment: end
+            }
+            appearance {
+                formatMask: FM999G999G999G990
+            }
+            source {
+                dataType: NUMBER
+            }
+            comments {
+                comments: Customer reported income; Display Label is Income; displayed in report; not displayed in form; format mask FM999G999G999G990; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column INCOME_LEVEL (
+            type: plainText
+            heading {
+                heading: Income Level
+            }
+            layout {
+                sequence: 120
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: Customer income band; Display Label is Income Level; displayed in report; not displayed in form; no format mask; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+
+        column SEGMENT_ID (
+            type: plainText
+            heading {
+                heading: Segment ID
+                alignment: end
+            }
+            layout {
+                sequence: 130
+                columnAlignment: end
+            }
+            source {
+                dataType: NUMBER
+            }
+            comments {
+                comments: Customer segmentation identifier; Display Label is Segment ID; displayed in report; not displayed in form; no format mask; value optional; read only; not the primary display column; no authorization scheme.
+            }
+        )
+    )
+)

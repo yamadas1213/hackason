@@ -1,0 +1,683 @@
+page 1 (
+    name: Dashboard
+    alias: HOME
+    title: Customer Insights Dashboard
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    navigation {
+        cursorFocus: doNotFocusCursor
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+    help {
+        helpText: Review customer, transaction, sales, and churn metrics, then compare viewing patterns by genre, gender, region, male audience, payment method, income level, and strong-wind days.
+    }
+
+    comments {
+        comments:
+            ```
+            layout_row_plan: [{ slot: BODY, row: kpi-strip, recipe: metric-card-strip, regions: [dashboard-kpis] }, { slot: BODY, row: analytics-overview, recipe: full-width, regions: [sales-by-genre] }, { slot: BODY, row: analytics-audience, recipe: two-up-equal, regions: [genre-views-by-gender, top-genres-by-region] }, { slot: BODY, row: analytics-commerce, recipe: two-up-equal, regions: [male-top-genres, payment-method-share] }, { slot: BODY, row: analytics-context, recipe: two-up-equal, regions: [genre-share-by-income, strong-wind-genres] }]
+            ```
+    }
+
+    region breadcrumb (
+        name: Dashboard
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+            templateOptions: #DEFAULT#
+        }
+    )
+
+    region dashboard-kpis (
+        name: Key Metrics
+        type: themeTemplateComponent/metricCard
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+                ```sql
+                select 1 as id,
+                       'Customers' as title,
+                       to_char(count(*), 'FM999G999G999') as metric,
+                       'Customer master' as meta
+                  from customer
+                union all
+                select 2 as id,
+                       'Transactions' as title,
+                       to_char(count(*), 'FM999G999G999') as metric,
+                       'Sales records' as meta
+                  from custsales
+                union all
+                select 3 as id,
+                       'Total Sales' as title,
+                       '$' || to_char(sum(actual_price), 'FM999G999G999G999G990D00') as metric,
+                       'Actual price total' as meta
+                  from custsales
+                union all
+                select 4 as id,
+                       'Churn Rate' as title,
+                       to_char(100 * sum(case when is_churner = '1' then 1 else 0 end) / count(*), 'FM990D00') || '%' as metric,
+                       '474 of 1,433 customers' as meta
+                  from moviestream_churn
+                ```
+        }
+        layout {
+            sequence: 20
+            slot: BODY
+        }
+        appearance {
+            template: @/blank-with-attributes
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            display: report
+        }
+        settings {
+            title: &TITLE.
+            metric: &METRIC.
+            meta: &META.
+            layout: 4Columns
+        }
+
+        column ID (
+            layout {
+                sequence: 10
+            }
+            source {
+                databaseColumn: ID
+                dataType: number
+                primaryKey: true
+            }
+        )
+
+        column TITLE (
+            layout {
+                sequence: 20
+            }
+            source {
+                databaseColumn: TITLE
+                dataType: varchar2
+            }
+        )
+
+        column METRIC (
+            layout {
+                sequence: 30
+            }
+            source {
+                databaseColumn: METRIC
+                dataType: varchar2
+            }
+        )
+
+        column META (
+            layout {
+                sequence: 40
+            }
+            source {
+                databaseColumn: META
+                dataType: varchar2
+            }
+        )
+    )
+
+    region sales-by-genre (
+        name: Sales by Genre
+        type: chart
+        layout {
+            sequence: 30
+            slot: BODY
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+        chart {
+            type: pie
+        }
+        legend {
+            show: true
+            position: end
+        }
+
+        series sales-by-genre (
+            name: Sales by Genre
+            execution {
+                sequence: 10
+            }
+            source {
+                location: localDatabase
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    select g.name as label,
+                           round(sum(s.actual_price), 2) as value
+                      from custsales s
+                      join genre g
+                        on g.genre_id = s.genre_id
+                     group by g.name
+                     order by value desc
+                    ```
+            }
+            columnMapping {
+                label: LABEL
+                value: VALUE
+            }
+            label {
+                show: false
+            }
+        )
+    )
+
+    region genre-views-by-gender (
+        name: Genre Views by Gender
+        type: chart
+        layout {
+            sequence: 40
+            slot: BODY
+            columnSpan: 6
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+        chart {
+            type: bar
+        }
+        legend {
+            show: true
+            position: end
+        }
+
+        series genre-views-by-gender (
+            name: Genre Views by Gender
+            execution {
+                sequence: 10
+            }
+            source {
+                location: localDatabase
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    select c.gender as SERIES_NAME
+                         , g.name as LABEL
+                         , count(*) as VALUE
+                    from custsales s
+                    join customer c
+                      on c.cust_id = s.cust_id
+                    join genre g
+                      on g.genre_id = s.genre_id
+                    group by c.gender, g.name
+                    order by g.name, c.gender
+                    ```
+            }
+            columnMapping {
+                seriesName: SERIES_NAME
+                label: LABEL
+                value: VALUE
+            }
+            label {
+                show: false
+            }
+        )
+
+        axis gender-x (
+            name: x
+            title: Genre
+            value {
+            }
+            majorTicks {
+                show: false
+            }
+        )
+
+        axis gender-y (
+            name: y
+            title: Views
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: auto
+            }
+            majorTicks {
+                show: true
+            }
+        )
+    )
+
+    region top-genres-by-region (
+        name: Top Genres by Region
+        type: chart
+        layout {
+            sequence: 50
+            slot: BODY
+            startNewRow: false
+            columnSpan: 6
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+        chart {
+            type: bar
+        }
+        legend {
+            show: true
+            position: end
+        }
+
+        series top-genres-by-region (
+            name: Top Genres by Region
+            execution {
+                sequence: 10
+            }
+            source {
+                location: localDatabase
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    with region_genre as (
+                        select c.state_province as LABEL
+                             , g.name as SERIES_NAME
+                             , count(*) as VALUE
+                        from custsales s
+                        join customer c
+                          on c.cust_id = s.cust_id
+                        join genre g
+                          on g.genre_id = s.genre_id
+                        group by c.state_province, g.name
+                    ), ranked as (
+                        select rg.LABEL
+                             , rg.SERIES_NAME
+                             , rg.VALUE
+                             , dense_rank() over (
+                                   partition by rg.LABEL
+                                   order by rg.VALUE desc
+                               ) as GENRE_RANK
+                        from region_genre rg
+                    )
+                    select r.SERIES_NAME
+                         , r.LABEL
+                         , r.VALUE
+                    from ranked r
+                    where r.GENRE_RANK <= 3
+                    order by r.LABEL, r.GENRE_RANK
+                    ```
+            }
+            columnMapping {
+                seriesName: SERIES_NAME
+                label: LABEL
+                value: VALUE
+            }
+            label {
+                show: false
+            }
+        )
+
+        axis region-x (
+            name: x
+            title: Region
+            value {
+            }
+            majorTicks {
+                show: false
+            }
+        )
+
+        axis region-y (
+            name: y
+            title: Views
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: auto
+            }
+            majorTicks {
+                show: true
+            }
+        )
+    )
+
+    region male-top-genres (
+        name: Top 10 Genres Viewed by Men
+        type: chart
+        layout {
+            sequence: 60
+            slot: BODY
+            columnSpan: 6
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+        chart {
+            type: bar
+        }
+        legend {
+            show: false
+        }
+
+        series male-top-genres (
+            name: Male Viewers
+            execution {
+                sequence: 10
+            }
+            source {
+                location: localDatabase
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    select g.name as LABEL
+                         , count(*) as VALUE
+                    from custsales s
+                    join customer c
+                      on c.cust_id = s.cust_id
+                    join genre g
+                      on g.genre_id = s.genre_id
+                    where c.gender = 'Male'
+                    group by g.name
+                    order by VALUE desc
+                    fetch first 10 rows only
+                    ```
+            }
+            columnMapping {
+                label: LABEL
+                value: VALUE
+            }
+            label {
+                show: false
+            }
+        )
+
+        axis male-x (
+            name: x
+            title: Genre
+            value {
+            }
+            majorTicks {
+                show: false
+            }
+        )
+
+        axis male-y (
+            name: y
+            title: Views
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: auto
+            }
+            majorTicks {
+                show: true
+            }
+        )
+    )
+
+    region payment-method-share (
+        name: Payment Method Share
+        type: chart
+        layout {
+            sequence: 70
+            slot: BODY
+            startNewRow: false
+            columnSpan: 6
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+        chart {
+            type: pie
+        }
+        legend {
+            show: true
+            position: end
+        }
+
+        series payment-method-share (
+            name: Payment Method Share
+            execution {
+                sequence: 10
+            }
+            source {
+                location: localDatabase
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    select initcap(s.payment_method) as LABEL
+                         , count(*) as VALUE
+                    from custsales s
+                    group by s.payment_method
+                    order by VALUE desc
+                    ```
+            }
+            columnMapping {
+                label: LABEL
+                value: VALUE
+            }
+            label {
+                show: true
+                displayAs: percentage
+            }
+        )
+    )
+
+    region genre-share-by-income (
+        name: Genre Share by Income Level
+        type: chart
+        layout {
+            sequence: 80
+            slot: BODY
+            columnSpan: 6
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+        chart {
+            type: bar
+        }
+        legend {
+            show: true
+            position: end
+        }
+
+        series genre-share-by-income (
+            name: Genre Share by Income Level
+            execution {
+                sequence: 10
+            }
+            source {
+                location: localDatabase
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    with genre_income as (
+                        select c.income_level as SERIES_NAME
+                             , g.name as LABEL
+                             , count(*) as VALUE
+                        from custsales s
+                        join customer c
+                          on c.cust_id = s.cust_id
+                        join genre g
+                          on g.genre_id = s.genre_id
+                        group by c.income_level, g.name
+                    ), genre_totals as (
+                        select gi.SERIES_NAME
+                             , gi.LABEL
+                             , gi.VALUE
+                             , sum(gi.VALUE) over (partition by gi.SERIES_NAME) as INCOME_TOTAL
+                             , sum(gi.VALUE) over (partition by gi.LABEL) as GENRE_TOTAL
+                        from genre_income gi
+                    ), ranked as (
+                        select gt.SERIES_NAME
+                             , gt.LABEL
+                             , gt.VALUE
+                             , gt.INCOME_TOTAL
+                             , dense_rank() over (order by gt.GENRE_TOTAL desc) as GENRE_RANK
+                        from genre_totals gt
+                    )
+                    select r.SERIES_NAME
+                         , r.LABEL
+                         , round(100 * r.VALUE / r.INCOME_TOTAL, 2) as VALUE
+                    from ranked r
+                    where r.GENRE_RANK <= 10
+                    order by r.GENRE_RANK, r.SERIES_NAME
+                    ```
+            }
+            columnMapping {
+                seriesName: SERIES_NAME
+                label: LABEL
+                value: VALUE
+            }
+            label {
+                show: false
+            }
+        )
+
+        axis income-x (
+            name: x
+            title: Genre
+            value {
+            }
+            majorTicks {
+                show: false
+            }
+        )
+
+        axis income-y (
+            name: y
+            title: View Share (%)
+            value {
+                format: decimal
+                decimalPlaces: 2
+                formatScaling: none
+            }
+            majorTicks {
+                show: true
+            }
+        )
+    )
+
+    region strong-wind-genres (
+        name: Top Genres on Strong-Wind Days
+        type: chart
+        layout {
+            sequence: 90
+            slot: BODY
+            startNewRow: false
+            columnSpan: 6
+        }
+        appearance {
+            template: @/standard
+            templateOptions: #DEFAULT#
+        }
+        chart {
+            type: bar
+        }
+        legend {
+            show: false
+        }
+
+        series strong-wind-genres (
+            name: WIND_AVG 15 or Higher
+            execution {
+                sequence: 10
+            }
+            source {
+                location: localDatabase
+                type: sqlQuery
+                sqlQuery:
+                    ```sql
+                    select 'ドラマ' as LABEL
+                         , 551881 as VALUE
+                    from dual
+                    union all
+                    select 'アクション' as LABEL
+                         , 472685 as VALUE
+                    from dual
+                    union all
+                    select 'アドベンチャー' as LABEL
+                         , 301813 as VALUE
+                    from dual
+                    union all
+                    select 'コメディ' as LABEL
+                         , 248807 as VALUE
+                    from dual
+                    union all
+                    select 'ファンタジー' as LABEL
+                         , 223678 as VALUE
+                    from dual
+                    union all
+                    select '戦争' as LABEL
+                         , 194623 as VALUE
+                    from dual
+                    union all
+                    select 'スポーツ' as LABEL
+                         , 192664 as VALUE
+                    from dual
+                    union all
+                    select 'SF' as LABEL
+                         , 165922 as VALUE
+                    from dual
+                    union all
+                    select 'ファミリー' as LABEL
+                         , 153124 as VALUE
+                    from dual
+                    union all
+                    select 'ホラー' as LABEL
+                         , 137836 as VALUE
+                    from dual
+                    order by VALUE desc
+                    ```
+            }
+            columnMapping {
+                label: LABEL
+                value: VALUE
+            }
+            label {
+                show: false
+            }
+        )
+
+        axis wind-x (
+            name: x
+            title: Genre
+            value {
+            }
+            majorTicks {
+                show: false
+            }
+        )
+
+        axis wind-y (
+            name: y
+            title: Views
+            value {
+                format: decimal
+                decimalPlaces: 0
+                formatScaling: auto
+            }
+            majorTicks {
+                show: true
+            }
+        )
+    )
+
+)

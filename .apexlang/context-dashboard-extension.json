@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "kind": "apexlang_context_capsule",
+  "intent": "Extend Customer Insights dashboard page 1 below Sales by Genre with native APEX charts for genre views by gender, top genres by Japanese prefecture, top 10 genres viewed by men, payment method share, genre share by income level, and top genres viewed on strong-wind days",
+  "normalized_intent": "extend customer insights dashboard page 1 below sales by genre with native apex charts for genre views by gender top genres by japanese prefecture top 10 genres viewed by men payment method share genre share by income level and top genres viewed on strong wind days",
+  "phase": "draft",
+  "matched_profiles": [
+    "dashboard"
+  ],
+  "selected_patterns": [
+    {
+      "id": "dashboard",
+      "name": "Dashboard",
+      "required_inputs": [
+        "metrics",
+        "chart_series",
+        "supporting_report_or_cards_region"
+      ],
+      "optional_inputs": [
+        "supporting_report_source",
+        "time_filter_item",
+        "drill_targets"
+      ],
+      "generated_components": [
+        "metric_card_template_components",
+        "chart_region",
+        "supporting_results_region"
+      ],
+      "renderer_rules": [
+        "emit_ir_first",
+        "prefer_metric_card_template_components",
+        "validate_generated_apx"
+      ],
+      "validation_rules": [
+        "DASHBOARD_KPI_METRIC_CARD_REQUIRED_001",
+        "DEFAULT_GUIDANCE_LAYER_REQUIRED_001"
+      ],
+      "reference_paths": [
+        "references/policies/memory-bank/30-pages/apex.dashboard.md",
+        "templates/template-components/metric-card/metric-card._common.md",
+        "references/domains/page-components/regions/dashboard/workflow-dashboard.md"
+      ]
+    }
+  ],
+  "selected_components": [
+    {
+      "name": "dashboard",
+      "target_type": "dashboard",
+      "rules": [
+        "30-pages/apex.page.md",
+        "30-pages/apex.dashboard.md"
+      ],
+      "templates": [
+        "templates/region-components/cards/cards._common.md",
+        "templates/page-examples/dashboard-page/dashboard-page._index.md",
+        "templates/page-examples/classic-report-page/classic-report-page._index.md"
+      ],
+      "requires": [
+        "sql or table",
+        "optional: columns"
+      ]
+    },
+    {
+      "name": "chart",
+      "target_type": "page",
+      "rules": [
+        "30-pages/apex.page.md",
+        "30-pages/apex.chart-page.md"
+      ],
+      "templates": [
+        "templates/region-components/chart/chart._common.md"
+      ],
+      "requires": [
+        "sql or table",
+        "column mappings",
+        "optional: controlling page items"
+      ]
+    }
+  ],
+  "best_practices": [
+    {
+      "rule_id": "GRAMMAR_FIRST_AUTHORITY_REQUIRED_001",
+      "summary": "APEXlang syntax comes from the EBNF grammar and semantic property legality comes from compiler metadata before templates are used as exact examples.",
+      "owner": "references/policies/memory-bank/00-guard/ai.guard.md",
+      "details_doc": "references/workflows/apexlang/prompt-contracts.md",
+      "examples_doc": "assets/grammar/apexlang.ebnf",
+      "enforced_by": [
+        "references/workflows/apex-generation/agents/30-agent-critique.md",
+        "runtime/internal/python/validate_apexlang.py"
+      ],
+      "directives": []
+    },
+    {
+      "rule_id": "PROGRESSIVE_DISCLOSURE_TRACE_REQUIRED_001",
+      "summary": "Non-trivial APEXlang work records the smallest source path from intent to rule/contract, grammar/compiler evidence, and exact template only when needed.",
+      "owner": "references/workflows/apexlang/prompt-contracts.md",
+      "details_doc": "references/workflows/apexlang/prompt-contracts.md",
+      "examples_doc": "references/workflows/apex-generation/nlu/nlu-routing-test-matrix.md",
+      "enforced_by": [
+        "references/workflows/apex-generation/agents/20-agent-draft.md",
+        "references/workflows/apex-generation/agents/30-agent-critique.md"
+      ],
+      "directives": []
+    },
+    {
+      "rule_id": "DEFAULT_GUIDANCE_LAYER_REQUIRED_001",
+      "summary": "User-facing pages need useful page help, behavior-aware item help, and specific developer-facing report/grid column comments by default.",
+      "owner": "references/policies/memory-bank/10-global/apex.global.md",
+      "details_doc": "references/policies/memory-bank/10-global/apex.global.md",
+      "examples_doc": "templates/items/items._common.md",
+      "enforced_by": [
+        "runtime/internal/python/validate_apexlang.py"
+      ],
+      "directives": [
+        "Generate actually helpful guidance content, not placeholders.",
+        "Comment content must be specific to the column.",
+        "Reject placeholder or empty-value patterns such as `Help Text Here`, `Inline Help Text Here`, `No help is available for this page`.",
+        "Reject placeholder or generic filler language.",
+        "Auto-revise the draft to add helpful page help, item help, and column comments.",
+        "Replace placeholders and label-only restatements with concise, behavior-aware wording."
+      ]
+    },
+    {
+      "rule_id": "DASHBOARD_KPI_METRIC_CARD_REQUIRED_001",
+      "summary": "Dashboard KPI strips use normalized Metric Card template components rather than KPI-like Classic Reports or static fake cards.",
+      "owner": "references/policies/memory-bank/30-pages/apex.dashboard.md",
+      "details_doc": "references/policies/memory-bank/30-pages/apex.dashboard.md",
+      "examples_doc": "templates/template-components/metric-card/metric-card._common.md",
+      "enforced_by": [
+        "runtime/internal/python/validate_apexlang.py"
+      ],
+      "directives": []
+    },
+    {
+      "rule_id": "STRUCTURED_PATTERN_PACK_REQUIRED_001",
+      "summary": "Common page workflows should be selected from structured pattern packs before falling back to Markdown template inference.",
+      "owner": "assets/contracts/page-construction-packs.json",
+      "details_doc": "assets/contracts/page-construction-packs.json",
+      "examples_doc": "assets/contracts/page-patterns.json",
+      "enforced_by": [
+        "assets/contracts/page-patterns.json",
+        "assets/contracts/page-construction-packs.json"
+      ],
+      "directives": []
+    },
+    {
+      "rule_id": "VALIDATOR_REPAIR_RECIPE_REQUIRED_001",
+      "summary": "Validation findings must map to the exact rule ID, deterministic fix, owning guidance, and rerun evidence before revision.",
+      "owner": "assets/validator-fix-recipes.json",
+      "details_doc": "assets/validator-fix-recipes.json",
+      "examples_doc": "references/workflows/apex-generation/agents/40-agent-revision.md",
+      "enforced_by": [
+        "references/workflows/apex-generation/agents/40-agent-revision.md"
+      ],
+      "directives": []
+    }
+  ],
+  "profile_directives": [
+    "Use one normalized Metric Card region for KPI strips and freeze the dashboard row plan before rendering."
+  ],
+  "applicable_repairs": [],
+  "template_projections": [
+    {
+      "path": "templates/template-components/metric-card/metric-card._common.md",
+      "sections": [
+        "Generation Rules",
+        "Metric Card Column Data Types",
+        "Guardrails"
+      ],
+      "status": "projected",
+      "source_bytes": 14074,
+      "projected_bytes": 3510,
+      "content": "# Generation Rules (MANDATORY)\n\n1. Use the dedicated `region-metric-card` template.\n2. Always emit a region `appearance {}` block for Metric Card.\n3. Use a valid region template such as `@/blank-with-attributes` or `@/standard`.\n4. For dashboard KPI strips, default `appearance.template` to `@/blank-with-attributes` so the Metric Card renders without visible standard region chrome.\n5. Use `@/standard` for Metric Card only when the requested design explicitly needs a titled or landmarked visible region wrapper.\n6. Emit `advanced { htmlDomId: ... }` only when external client code, dynamic actions, or other page logic must target a known region DOM id.\n7. Keep `display: report` in `componentAppearance`.\n8. Use `column-metric-card` for source-column mappings.\n9. Keep plugin attribute names and enumerated values aligned with `metric-card._template_options.md`, `../avatar._template_options.md`, and `../badge._template_options.md`.\n10. In report mode, treat child `column (...)` metadata as part of the emitted Metric Card source contract, not as an optional compiler appeasement detail.\n11. Emit explicit child `column (...)` metadata for every delivered source projection before finals. Do not satisfy the compiler by adding only one placeholder column when the source projects multiple columns.\n12. A single Metric Card region can render multiple cards. When the prompt asks for several independent metrics in one region, prefer a multi-row SQL source that normalizes the projections for each card, commonly by `UNION ALL`-ing one row per metric into a shared column shape.\n13. Metric Card `settings`, `plugin-avatar`, `plugin-badge`, and `rowSelection` expose more value hooks than just `title` and `metric`. Use the accepted property surface from `metric-card._template_options.md`, `../avatar._template_options.md`, and `../badge._template_options.md` when those behaviors are needed.\n14. Do not require settings property names to match child-column names one-for-one. Those properties may bind to literals, `&COLUMN_NAME.` substitutions, or other accepted placeholders; the child `column (...)` blocks still describe the delivered source projection.\n15. Metric Card avatar support is export-backed in this runtime through `plugin-avatar {}`. Use `plugin-avatar.displayAvatar` for visibility and keep avatar configuration in that block.\n16. Metric Card badge support is export-backed in this runtime through `plugin-badge {}`. Use `plugin-badge.displayBadge` for visibility and keep badge configuration in that block.\n17. When `rowSelection` is emitted with any non-null mode, at least one child `column (...)` must mark the row identity with `source.primaryKey: true`.\n18. For every emitted child column, set `source.dataType` to one exact token from the Metric Card Column Data Types inventory below.\n\n# Metric Card Column Data Types\n\nSupported `column.source.dataType` values for Metric Card child columns:\n\n- `bfile`\n- `blob`\n- `boolean`\n- `clob`\n- `date`\n- `intervalDayToSecond`\n- `intervalYearToMonth`\n- `number`\n- `rowid`\n- `sdoGeometry`\n- `timestamp`\n- `timestampWithLocalTimeZone`\n- `timestampWithTimeZone`\n- `varchar2`\n\n# Guardrails\n\n- Metadata export lookup: search for `Metric Card`, `themeTemplateComponent/metricCard`, and `column-metric-card`.\n- If the requested Metric Card behavior depends on external page logic targeting the region container directly, treat the chosen region template plus optional `advanced.htmlDomId` as part of the runtime contract, not as incidental styling."
+    }
+  ],
+  "source_paths": [
+    "references/policies/memory-bank/00-guard/ai.guard.md",
+    "references/workflows/apexlang/prompt-contracts.md",
+    "assets/grammar/apexlang.ebnf",
+    "references/workflows/apex-generation/nlu/nlu-routing-test-matrix.md",
+    "references/policies/memory-bank/10-global/apex.global.md",
+    "templates/items/items._common.md",
+    "references/policies/memory-bank/30-pages/apex.dashboard.md",
+    "templates/template-components/metric-card/metric-card._common.md",
+    "assets/contracts/page-construction-packs.json",
+    "assets/contracts/page-patterns.json",
+    "assets/validator-fix-recipes.json",
+    "references/workflows/apex-generation/agents/40-agent-revision.md",
+    "references/policies/memory-bank/30-pages/apex.layout.md",
+    "references/domains/page-components/regions/dashboard/workflow-dashboard.md",
+    "30-pages/apex.page.md",
+    "30-pages/apex.dashboard.md",
+    "templates/region-components/cards/cards._common.md",
+    "templates/page-examples/dashboard-page/dashboard-page._index.md",
+    "templates/page-examples/classic-report-page/classic-report-page._index.md",
+    "30-pages/apex.chart-page.md",
+    "templates/region-components/chart/chart._common.md"
+  ],
+  "stop_conditions": [
+    "Stop with Missing Inputs when authoritative structure, database-object evidence, target mappings, or compiler-backed legality cannot be proven.",
+    "Stop when same-rank authoritative sources conflict.",
+    "Do not invent blocks, properties, enum values, template options, schema objects, targets, or identifiers."
+  ],
+  "required_validation": [
+    "Run compiler-truth audit before publish or live work.",
+    "Use problems.json plus projected validator repair recipes for deterministic revision.",
+    "Treat live APEX validation as authoritative when the workflow requires runtime completion."
+  ],
+  "fingerprint": "852e91186b42399c378b"
+}

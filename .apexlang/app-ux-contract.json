@@ -1,0 +1,120 @@
+{
+  "sourceEvidence": {
+    "schema": "CUSTOMER_INSIGHTS",
+    "tables": ["CUSTOMER", "CUSTSALES", "GENRE", "MOVIESTREAM_CHURN", "WEATHER"],
+    "requirements": ["FR-001", "FR-002", "FR-006"],
+    "dataQualityNotes": [
+      "CUSTSALES.DAY_ID is NULL for all 25,037,621 rows",
+      "Strong-wind analysis is a fixed snapshot derived from the imported-source CSVs and WEATHER"
+    ]
+  },
+  "pageInventory": [
+    {
+      "page": 1,
+      "name": "Dashboard",
+      "type": "dashboard",
+      "requirementId": "FR-001",
+      "regions": [
+        "dashboard-kpis",
+        "sales-by-genre",
+        "genre-views-by-gender",
+        "top-genres-by-region",
+        "male-top-genres",
+        "payment-method-share",
+        "genre-share-by-income",
+        "strong-wind-genres"
+      ]
+    },
+    {
+      "page": 2,
+      "name": "Customers",
+      "type": "interactive-report",
+      "requirementId": "FR-002",
+      "regions": ["customers"]
+    }
+  ],
+  "compositionPlan": {
+    "workspace": "CUSTOMER_INSIGHTS",
+    "breadcrumbs": [
+      {"page": 1, "entry": "Dashboard", "root": true},
+      {"page": 2, "entry": "Customers", "parentPage": 1}
+    ],
+    "layoutRecipes": [
+      {"page": 1, "row": "kpi-strip", "recipe": "metric-card-strip", "regions": ["dashboard-kpis"]},
+      {"page": 1, "row": "analytics-overview", "recipe": "full-width", "regions": ["sales-by-genre"]},
+      {"page": 1, "row": "analytics-audience", "recipe": "two-up-equal", "regions": ["genre-views-by-gender", "top-genres-by-region"]},
+      {"page": 1, "row": "analytics-commerce", "recipe": "two-up-equal", "regions": ["male-top-genres", "payment-method-share"]},
+      {"page": 1, "row": "analytics-context", "recipe": "two-up-equal", "regions": ["genre-share-by-income", "strong-wind-genres"]},
+      {"page": 2, "row": "report", "recipe": "full-width", "regions": ["customers"]}
+    ],
+    "modalTargets": [],
+    "pageActions": []
+  },
+  "richUiPatternPlan": [
+    {
+      "pattern": "metricCard",
+      "page": 1,
+      "region": "dashboard-kpis",
+      "titles": ["Customers", "Transactions", "Total Sales", "Churn Rate"],
+      "valueSource": "SQL aggregates",
+      "layout": "4Columns"
+    },
+    {
+      "pattern": "chart",
+      "page": 1,
+      "region": "sales-by-genre",
+      "nativeComponent": "pie chart",
+      "valueSource": "sum(CUSTSALES.ACTUAL_PRICE) grouped by GENRE.NAME"
+    },
+    {
+      "pattern": "chart-set",
+      "page": 1,
+      "regions": [
+        "genre-views-by-gender",
+        "top-genres-by-region",
+        "male-top-genres",
+        "payment-method-share",
+        "genre-share-by-income",
+        "strong-wind-genres"
+      ],
+      "nativeComponents": ["bar", "bar", "bar", "pie", "bar", "bar"],
+      "valueSources": [
+        "transaction count by gender and genre",
+        "top three genres per state/province",
+        "top ten genres for Male customers",
+        "transaction count by payment method",
+        "top ten genre shares within income level",
+        "top ten genre snapshot for WIND_AVG >= 15"
+      ]
+    },
+    {
+      "pattern": "interactiveReport",
+      "page": 2,
+      "region": "customers",
+      "valueSource": "CUSTOMER"
+    }
+  ],
+  "lovPlan": {
+    "shared": [],
+    "static": [],
+    "dynamic": []
+  },
+  "behaviorPlan": {
+    "modalTargets": [],
+    "pageActions": [],
+    "validations": [],
+    "navigation": [
+      {"from": "navigation-menu", "toPage": 1, "label": "Dashboard"},
+      {"from": "navigation-menu", "toPage": 2, "label": "Customers"}
+    ]
+  },
+  "testPlan": [
+    "Verify dashboard KPI totals against base tables",
+    "Verify the genre chart query returns grouped sales",
+    "Verify the six added analytics render below Sales by Genre in three two-chart rows",
+    "Verify all live chart queries against CUSTOMER, CUSTSALES, and GENRE",
+    "Verify the strong-wind snapshot against WEATHER and the imported-source CSVs",
+    "Verify the customer report searches, filters, sorts, and downloads",
+    "Verify navigation and breadcrumbs"
+  ]
+}

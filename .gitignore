@@ -1,0 +1,38 @@
+# -----------------------------------------------------------------------------
+# Hackathon input data
+# -----------------------------------------------------------------------------
+# The supplied archive and its extracted contents total several GB and may
+# include customer-related data. Obtain them from the approved data source.
+/dataplatform/data/
+
+# -----------------------------------------------------------------------------
+# APEXlang local execution artefacts
+# -----------------------------------------------------------------------------
+# Keep specifications and SQL checks in .apexlang, but exclude imported/runtime
+# reports and transcripts because they are regenerated on each execution.
+/.apexlang/runtime-import/
+/.apexlang/runtime-import-103/
+/.apexlang/runtime-validation/
+/.apexlang/compiler-truth-report.json
+/.apexlang/*.log
+
+# -----------------------------------------------------------------------------
+# Secrets and local environment settings
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# -----------------------------------------------------------------------------
+# OS and editor files
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
